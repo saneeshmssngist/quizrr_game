@@ -4,10 +4,11 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
-import android.provider.Settings;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -15,22 +16,24 @@ import android.widget.LinearLayout;
 import android.widget.Toast;
 import com.astalavista.saneesh.quizrrgame.Model.QuizTable;
 import com.astalavista.saneesh.quizrrgame.R;
+import com.astalavista.saneesh.quizrrgame.Session;
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
-import java.util.HashMap;
 
 
-public class PreHomeActivity extends Activity {
+public class LoginScreen extends Activity {
 
     private LinearLayout layoutProgress;
-
     private EditText edtTxtName, edtTxtPhone;
     private Button btnEnter;
     private LinearLayout layoutSkip;
     private boolean doubleBackToExitPressedOnce = false;
     SharedPreferences pref;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -45,8 +48,20 @@ public class PreHomeActivity extends Activity {
 
     private void setDatas() {
 
+        new AsyncTask<Void, Void, Void>() {
+            @Override
+            protected Void doInBackground(Void... voids) {
 
-        ArrayList<QuizTable> quizTables = new Gson.fromloadJSONFromAsset();
+                ArrayList<QuizTable> quizTablesArray = new Gson().fromJson(loadJSONFromAsset(), new TypeToken<ArrayList<QuizTable>>() {
+                }.getType());
+                for (int i = 0; i < quizTablesArray.size(); i++) {
+                    SplashScreen.INSTANCE.myDao().addQuizQuestions(quizTablesArray.get(i));
+                    Log.d("Quizrr", "run: "+i);
+                }
+
+                return null;
+            }
+        }.execute();
 
     }
 
@@ -69,27 +84,52 @@ public class PreHomeActivity extends Activity {
             @Override
             public void onClick(View v) {
 
-                if (!TextUtils.isEmpty(edtTxtName.getText().toString()) && !TextUtils.isEmpty(edtTxtPhone.getText().toString())) {
+                if (!TextUtils.isEmpty(edtTxtName.getText().toString())) {
 
-                            SharedPreferences.Editor edt = pref.edit();
-                            edt.putBoolean("login_executed", true);
-                            edt.commit();
+                    btnEnter.setEnabled(false);
+                    new Handler().postDelayed(new Runnable() {
+                        @Override
+                        public void run() {
 
-                            Intent intent = new Intent(PreHomeActivity.this, GameActivity.class);
-                            intent.addCategory(Intent.CATEGORY_HOME);
-                            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
-                            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                            Session.setUserName(edtTxtName.getText().toString());
+                            performLogin();
 
-                            startActivity(intent);
+                        }
+                    },1000);
+
 
                 } else {
-                    Toast.makeText(PreHomeActivity.this, "Please enter fields or Skip", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(LoginScreen.this, "Please enter name or Skip", Toast.LENGTH_SHORT).show();
                 }
 
             }
         });
 
+//        layoutSkip.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View v) {
+//
+//                performLogin();
+//            }
+//        });
+
     }
+
+    private void performLogin() {
+
+        SharedPreferences.Editor edt = pref.edit();
+        edt.putBoolean("login_executed", true);
+        edt.commit();
+
+        Intent intent = new Intent(LoginScreen.this, GameActivity.class);
+        intent.addCategory(Intent.CATEGORY_HOME);
+        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
+        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+
+        startActivity(intent);
+
+    }
+
 
     public String loadJSONFromAsset() {
         String json = null;

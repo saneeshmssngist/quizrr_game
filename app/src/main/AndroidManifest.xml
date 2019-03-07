@@ -16,10 +16,17 @@
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
         </activity>
-        <activity android:name=".Activities.GameActivity"/>
-        <activity android:name=".Activities.PreHomeActivity"/>
-        <activity android:name=".Activities.MainActivity"/>
-
+        <activity
+                android:name=".Activities.GameActivity"
+                android:theme="@style/AppThemeNoToolbar">
+        </activity>
+        <activity android:name=".Activities.LoginScreen"/>
+        <activity android:name=".Activities.MainActivity">
+        </activity>
+        <activity android:name=".Activities.ScoreBoardActivity">
+        </activity>
+        <activity android:name=".Activities.BaseActivity">
+        </activity>
     </application>
 
 </manifest>

@@ -10,14 +10,14 @@
         />
 
     <gradient
-        android:startColor="@color/darkBlue"
-        android:centerColor="@color/darkBlue"
-        android:endColor="@color/darkBlue"
+        android:startColor="@color/blue_lite"
+        android:centerColor="@color/blue_lite"
+        android:endColor="@color/blue_lite"
         />
 
     <stroke
-        android:width="1dp"
-        android:color="@color/black"
+        android:width="0.5dp"
+        android:color="@color/white"
         />
 
 </shape>
