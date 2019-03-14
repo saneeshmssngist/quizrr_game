@@ -53,9 +53,9 @@ public class SplashScreen extends AppCompatActivity {
                     intent = new Intent(SplashScreen.this, LoginScreen.class);
                 }
 
-                intent.addCategory(Intent.CATEGORY_HOME);
-                intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
-                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+//                intent.addCategory(Intent.CATEGORY_HOME);
+//                intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
+//                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
 
                 Pair pairs = new Pair<View, String>(imgView, "homeQuizzr");
                 ActivityOptions activityOptions = null;

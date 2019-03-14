@@ -2,66 +2,91 @@
 <LinearLayout
         xmlns:android="http://schemas.android.com/apk/res/android"
         xmlns:app="http://schemas.android.com/apk/res-auto"
-        android:layout_width="match_parent" android:layout_height="match_parent"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
         android:background="@color/black"
         android:orientation="vertical"
 >
 
-    <RelativeLayout
+    <com.github.florent37.shapeofview.shapes.ArcView
             android:layout_width="match_parent"
             android:layout_height="0dp"
+            android:elevation="4dp"
+            app:shape_arc_height="20dp"
+            app:shape_arc_position="bottom"
+            app:shape_arc_cropDirection="outside"
             android:layout_weight="2"
-            android:background="#90282727"
     >
 
-        <ImageView
-                android:id="@+id/imgViewBack"
-                android:layout_width="30dp"
-                android:layout_height="30dp"
-                android:src="@drawable/arrow"
-                android:layout_margin="20dp"
-                android:layout_alignParentLeft="true"
-                android:layout_alignParentTop="true"
-        />
+        <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:background="@drawable/scoreboard_bg"
+        >
+            <TextView
+                    android:id="@+id/txtViewTitle"
+                    android:layout_width="200dp"
+                    android:layout_height="100dp"
+                    android:text="INFINITY QUIZ"
+                    android:layout_centerVertical="true"
+                    android:layout_centerHorizontal="true"
+                    android:gravity="center"
+                    android:textColor="@color/white"
+                    android:textSize="20dp"
+                    android:textStyle="normal"
+                    android:paddingBottom="50dp"
+                    android:alpha="0.5"
+            />
 
-        <TextView
-                android:id="@+id/txtCoins"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_below="@+id/txtName"
-                android:layout_margin="20dp"
-                android:text="20 Credits"
-                android:gravity="center"
-                android:textSize="18sp"
-                android:textColor="#8d9400"
-                android:layout_alignParentRight="true"
-                android:layout_alignParentTop="true"
-        />
+            <ImageView
+                    android:id="@+id/imgViewBack"
+                    android:layout_width="30dp"
+                    android:layout_height="30dp"
+                    android:src="@drawable/arrow"
+                    android:layout_margin="20dp"
+                    android:layout_alignParentLeft="true"
+                    android:layout_alignParentTop="true"
+            />
 
-        <de.hdodenhof.circleimageview.CircleImageView
-                android:id="@+id/imgViewProfile"
-                android:layout_width="80dp"
-                android:layout_height="80dp"
-                android:src="@drawable/profile1"
-                android:layout_centerVertical="true"
-                android:layout_centerHorizontal="true"
-        />
+            <TextView
+                    android:id="@+id/txtCoins"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@+id/txtName"
+                    android:layout_margin="20dp"
+                    android:text="0 Coins"
+                    android:gravity="center"
+                    android:textSize="18sp"
+                    android:textColor="#8d9400"
+                    android:layout_alignParentRight="true"
+                    android:layout_alignParentTop="true"
+            />
 
-        <TextView
-                android:id="@+id/txtName"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:minWidth="100dp"
-                android:layout_below="@+id/imgViewProfile"
-                android:layout_marginTop="15dp"
-                android:layout_centerHorizontal="true"
-                android:text="user235"
-                android:gravity="center"
-                android:textSize="18sp"
-                android:textStyle="bold"
-        />
-    </RelativeLayout>
+            <de.hdodenhof.circleimageview.CircleImageView
+                    android:id="@+id/imgViewProfile"
+                    android:layout_width="80dp"
+                    android:layout_height="80dp"
+                    android:src="@drawable/profile1"
+                    android:layout_centerVertical="true"
+                    android:layout_centerHorizontal="true"
+            />
 
+            <TextView
+                    android:id="@+id/txtName"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:minWidth="100dp"
+                    android:layout_below="@+id/imgViewProfile"
+                    android:layout_marginTop="15dp"
+                    android:layout_centerHorizontal="true"
+                    android:text="user235"
+                    android:gravity="center"
+                    android:textSize="18sp"
+                    android:textStyle="bold"
+            />
+        </RelativeLayout>
+
+    </com.github.florent37.shapeofview.shapes.ArcView>
 
     <LinearLayout
             android:layout_width="match_parent"

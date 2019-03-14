@@ -42,7 +42,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="30dp"
                     android:gravity="center"
-                    android:text="Enter your details to get started "
+                    android:text="Enter your name to get started "
                     android:textStyle="bold"
                     android:textColor="#5e5d5d"
                     android:textSize="14sp"/>

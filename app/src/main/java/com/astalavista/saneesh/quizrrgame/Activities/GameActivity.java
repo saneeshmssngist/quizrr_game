@@ -1,6 +1,7 @@
 package com.astalavista.saneesh.quizrrgame.Activities;
 
 import android.animation.Animator;
+import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -8,11 +9,12 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Typeface;
 import android.graphics.drawable.ColorDrawable;
+import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
-import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.CardView;
 import android.view.*;
 import android.view.animation.AlphaAnimation;
 import android.view.animation.Animation;
@@ -24,16 +26,22 @@ import android.widget.TextView;
 import com.astalavista.saneesh.quizrrgame.Model.QuizTable;
 import com.astalavista.saneesh.quizrrgame.R;
 import com.astalavista.saneesh.quizrrgame.Session;
+import com.crashlytics.android.Crashlytics;
+import com.google.android.gms.ads.*;
+import io.fabric.sdk.android.Fabric;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
+import static android.media.AudioManager.RINGER_MODE_SILENT;
+import static android.media.AudioManager.RINGER_MODE_VIBRATE;
+
 public class GameActivity extends BaseActivity implements View.OnClickListener {
 
     private TextView txtViewQuestion, txtViewOption1, txtViewOption2, txtViewOption3, txtViewOption4;
 
-    private int questionNumber = -1;
+    private int questionNumber = 0;
     private QuizTable questionData;
     private LinearLayout layoutOption1, layoutOption2, layoutOption3, layoutOption4;
     private LinearLayout layoutButton;
@@ -45,7 +53,7 @@ public class GameActivity extends BaseActivity implements View.OnClickListener {
     private int myCoins, count;
 //    private MediaPlayer mediaCoinDrop, mediaCountDown, mediaError;
 
-    private MediaPlayer nextSlide, buttonClick, wrongAnswer, correctAnswer;
+    private MediaPlayer nextSlide, buttonClick, wrongAnswer, correctAnswer, menubutton, optionclick;
     private TextView txtViewTimeout;
     private int timerCount;
 
@@ -60,15 +68,18 @@ public class GameActivity extends BaseActivity implements View.OnClickListener {
     private Dialog dialog;
     private TextView txtNum1, txtNum2, txtNum3, txtNum4;
     private ImageView imgViewOptions;
-    private RelativeLayout fiftyOption;
+    private RelativeLayout fiftyOption,layoutTop;
 
-//    private AdView adMobView;
-    // private InterstitialAd interstitialAd;
+    private AdView adMobView;
+     private InterstitialAd interstitialAd;
+    private boolean revealEnabled = false;
+    private boolean clickEnabled = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
+        Fabric.with(this, new Crashlytics());
         setContentView(R.layout.activity_game_quiz);
 
         handler1 = new Handler();
@@ -78,26 +89,67 @@ public class GameActivity extends BaseActivity implements View.OnClickListener {
         Session.getSession(this);
         pref = getSharedPreferences("ActivityPREF", Context.MODE_PRIVATE);
 
+
 //        setStatusBarGradiant(this);
         getViews();
         initControl();
-        setData();
+        setSoundSystem();
 
-        setVolume();
+        setInitialDatas();
+
+        new Handler().postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                setData();
+            }
+        },3000);
+
+//        setVolume();
         setUpAdmob();
+    }
+
+    private void setInitialDatas() {
+
+        final Animation zoom = AnimationUtils.loadAnimation(GameActivity.this, R.anim.zoom_in);
+        final Animation slideDown = AnimationUtils.loadAnimation(GameActivity.this, R.anim.slide_down);
+        final Animation slideUp = AnimationUtils.loadAnimation(GameActivity.this, R.anim.slide_up);
+        layoutOption1.startAnimation(zoom);
+        layoutOption2.startAnimation(zoom);
+        layoutOption3.startAnimation(zoom);
+        layoutOption4.startAnimation(zoom);
+        layoutTop.startAnimation(slideDown);
+        imgViewOptions.startAnimation(slideUp);
+
+    }
+
+    private void setSoundSystem() {
+
+        AudioManager audioManager = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
+        if (audioManager.getRingerMode() == RINGER_MODE_SILENT || audioManager.getRingerMode() == RINGER_MODE_VIBRATE) {
+            SharedPreferences.Editor edt = pref.edit();
+            edt.putBoolean("SoundSystem", false);
+            edt.commit();
+            setVolume();
+        } else {
+            SharedPreferences.Editor edt = pref.edit();
+            edt.putBoolean("SoundSystem", true);
+            edt.commit();
+            setVolume();
+        }
+
     }
 
     private void setUpAdmob() {
 
         //admob sync..
-//        MobileAds.initialize(this, getResources().getString(R.string.APPID));
-//
+        MobileAds.initialize(this, getResources().getString(R.string.APPID));
+
 //        adMobView = (AdView) findViewById(R.id.adMobView);
 //        adMobView.loadAd(new AdRequest.Builder().build());
-//
-//        interstitialAd = new InterstitialAd(this);
-//        interstitialAd.setAdUnitId(getResources().getString(R.string.INTERTITIAID));
-//        interstitialAd.loadAd(new AdRequest.Builder().build());
+
+        interstitialAd = new InterstitialAd(this);
+        interstitialAd.setAdUnitId(getResources().getString(R.string.INTERTITIAID));
+        interstitialAd.loadAd(new AdRequest.Builder().build());
     }
 
     public void getViews() {
@@ -112,6 +164,8 @@ public class GameActivity extends BaseActivity implements View.OnClickListener {
         layoutOption2 = (LinearLayout) findViewById(R.id.layoutOption2);
         layoutOption3 = (LinearLayout) findViewById(R.id.layoutOption3);
         layoutOption4 = (LinearLayout) findViewById(R.id.layoutOption4);
+
+        layoutTop = (RelativeLayout) findViewById(R.id.layoutTop);
 
         txtNum1 = (TextView) findViewById(R.id.txtNum1);
         txtNum2 = (TextView) findViewById(R.id.txtNum2);
@@ -152,6 +206,8 @@ public class GameActivity extends BaseActivity implements View.OnClickListener {
             buttonClick.setVolume(1, 1);
             wrongAnswer.setVolume(1, 1);
             correctAnswer.setVolume(1, 1);
+            menubutton.setVolume(1, 1);
+            optionclick.setVolume(1, 1);
 //            mediaCountDown.setVolume(1, 1);
 //            mediaError.setVolume(1, 1);
 
@@ -161,6 +217,8 @@ public class GameActivity extends BaseActivity implements View.OnClickListener {
             buttonClick.setVolume(0, 0);
             wrongAnswer.setVolume(0, 0);
             correctAnswer.setVolume(0, 0);
+            menubutton.setVolume(0, 0);
+            optionclick.setVolume(0, 0);
 //            mediaCountDown.setVolume(0, 0);
 //            mediaError.setVolume(0, 0);
         }
@@ -173,6 +231,8 @@ public class GameActivity extends BaseActivity implements View.OnClickListener {
         buttonClick = MediaPlayer.create(this, R.raw.button_click);
         wrongAnswer = MediaPlayer.create(this, R.raw.wrongsound);
         correctAnswer = MediaPlayer.create(this, R.raw.correctsound);
+        menubutton = MediaPlayer.create(this, R.raw.menubutton);
+        optionclick = MediaPlayer.create(this, R.raw.optionclick);
 //        mediaCountDown = MediaPlayer.create(this, R.raw.sound2);
 //        mediaError = MediaPlayer.create(this, R.raw.sound1);
 
@@ -185,6 +245,8 @@ public class GameActivity extends BaseActivity implements View.OnClickListener {
         layoutButtonLeft.setOnClickListener(this);
         imgViewOptions.setOnClickListener(this);
 
+        questionNumber = Session.getTotQuestions();
+
     }
 
     public void setData() {
@@ -196,22 +258,22 @@ public class GameActivity extends BaseActivity implements View.OnClickListener {
 
     private void setInterstitialAd() {
 
-//        interstitialAd.setAdListener(new AdListener() {
-//            @Override
-//            public void onAdClosed() {
-//                super.onAdClosed();
-//                setData();
-//
-//                interstitialAd.loadAd(new AdRequest.Builder().build());
-//            }
-//        });
-//
-//        if (interstitialAd.isLoaded()) {
-//            interstitialAd.show();
-//        } else {
-//
-//            setData();
-//        }
+        interstitialAd.setAdListener(new AdListener() {
+            @Override
+            public void onAdClosed() {
+                super.onAdClosed();
+                setData();
+
+                interstitialAd.loadAd(new AdRequest.Builder().build());
+            }
+        });
+
+        if (interstitialAd.isLoaded()) {
+            interstitialAd.show();
+        } else {
+
+            setData();
+        }
 
     }
 
@@ -227,7 +289,7 @@ public class GameActivity extends BaseActivity implements View.OnClickListener {
         checkDupdatas(questionData.getId());
 
         //set Question number.
-        txtViewQuestionNumber.setText("#" + String.valueOf(questionNumber + 1));
+        txtViewQuestionNumber.setText("#" + String.valueOf(questionNumber));
 
         //clearing all datas .
         resetAllDatas();
@@ -394,34 +456,45 @@ public class GameActivity extends BaseActivity implements View.OnClickListener {
     }
 
 
+    long TIME = 1 * 1000;
+
     @Override
-    public void onClick(View v) {
+    public void onClick(final View v) {
+
+        if(clickEnabled)
+            return;
+
+        clickEnabled = true;
 
         int id = v.getId();
-        buttonClick.start();
 
         switch (id) {
             case R.id.txtViewOption1:
+                buttonClick.start();
                 layoutOption1.setBackgroundResource(R.drawable.game_quiz_selected);
                 txtNum1.setBackgroundResource(R.drawable.game_quiz_num_selected);
                 checkAnswer(1);
                 break;
             case R.id.txtViewOption2:
+                buttonClick.start();
                 layoutOption2.setBackgroundResource(R.drawable.game_quiz_selected);
                 txtNum2.setBackgroundResource(R.drawable.game_quiz_num_selected);
                 checkAnswer(2);
                 break;
             case R.id.txtViewOption3:
+                buttonClick.start();
                 layoutOption3.setBackgroundResource(R.drawable.game_quiz_selected);
                 txtNum3.setBackgroundResource(R.drawable.game_quiz_num_selected);
                 checkAnswer(3);
                 break;
             case R.id.txtViewOption4:
+                buttonClick.start();
                 layoutOption4.setBackgroundResource(R.drawable.game_quiz_selected);
                 txtNum4.setBackgroundResource(R.drawable.game_quiz_num_selected);
                 checkAnswer(4);
                 break;
             case R.id.imgView:
+                menubutton.start();
                 revealShowHome(0);
                 break;
             case R.id.layoutButton:
@@ -449,6 +522,15 @@ public class GameActivity extends BaseActivity implements View.OnClickListener {
 //
 //                break;
         }
+
+        new Handler().postDelayed(new Runnable() {
+
+            @Override
+            public void run() {
+                clickEnabled = false;
+            }
+        }, TIME);
+
 
     }
 
@@ -496,42 +578,47 @@ public class GameActivity extends BaseActivity implements View.OnClickListener {
                     Session.setCorrectAns(1);
                 }
 
-                //for display correct answer.
-                switch (Integer.valueOf(questionData.getAnswer())) {
-                    case 1:
-                        layoutOption1.setBackgroundResource(R.drawable.game_quiz_correct);
-                        txtNum1.setBackgroundResource(R.drawable.game_quiz_num_right);
-                        break;
-                    case 2:
-                        layoutOption2.setBackgroundResource(R.drawable.game_quiz_correct);
-                        txtNum2.setBackgroundResource(R.drawable.game_quiz_num_right);
-                        break;
-                    case 3:
-                        layoutOption3.setBackgroundResource(R.drawable.game_quiz_correct);
-                        txtNum3.setBackgroundResource(R.drawable.game_quiz_num_right);
-                        break;
-                    case 4:
-                        layoutOption4.setBackgroundResource(R.drawable.game_quiz_correct);
-                        txtNum4.setBackgroundResource(R.drawable.game_quiz_num_right);
-                        break;
-                }
-
-
-//        layoutButton.setVisibility(View.VISIBLE);
-                diableButtons();
-
-                new Handler().postDelayed(new Runnable() {
-                    @Override
-                    public void run() {
-                        revealShowHome(1);
-                        nextSlide.start();
-
-                    }
-                }, 1500);
+                setCorrectAnswer();
 
             }
         }, 1000);
 
+    }
+
+
+    public void setCorrectAnswer() {
+        //for display correct answer.
+        switch (Integer.valueOf(questionData.getAnswer())) {
+            case 1:
+                layoutOption1.setBackgroundResource(R.drawable.game_quiz_correct);
+                txtNum1.setBackgroundResource(R.drawable.game_quiz_num_right);
+                break;
+            case 2:
+                layoutOption2.setBackgroundResource(R.drawable.game_quiz_correct);
+                txtNum2.setBackgroundResource(R.drawable.game_quiz_num_right);
+                break;
+            case 3:
+                layoutOption3.setBackgroundResource(R.drawable.game_quiz_correct);
+                txtNum3.setBackgroundResource(R.drawable.game_quiz_num_right);
+                break;
+            case 4:
+                layoutOption4.setBackgroundResource(R.drawable.game_quiz_correct);
+                txtNum4.setBackgroundResource(R.drawable.game_quiz_num_right);
+                break;
+        }
+
+
+//        layoutButton.setVisibility(View.VISIBLE);
+        diableButtons();
+
+        new Handler().postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                revealShowHome(1);
+                nextSlide.start();
+
+            }
+        }, 1500);
     }
 
     public void diableButtons() {
@@ -569,21 +656,21 @@ public class GameActivity extends BaseActivity implements View.OnClickListener {
                     if (count > 10) {
 //                        mediaCoinDrop.pause();
                         Session.setSharedData("myCoins", String.valueOf(myCoins));
-//                        Animation zoomout = AnimationUtils.loadAnimation(GameActivity.this, R.anim.zoomout);
-//                        txtViewCoins.startAnimation(zoomout);
+                        Animation zoomout = AnimationUtils.loadAnimation(GameActivity.this, R.anim.zoomout);
+                        txtViewCoins.startAnimation(zoomout);
                         return;
                     }
 
                     myCoins += 1;
                     txtViewCoins.setText(String.valueOf(myCoins));
-                    handler1.postDelayed(this, 100);
+                    handler1.postDelayed(this, 70);
 
                 }
             }, 100);
         } else {
 //            mediaError.start();
 
-            if (myCoins > 2) {
+            if (myCoins >= 5) {
 
                 Animation zoomin = AnimationUtils.loadAnimation(this, R.anim.zoomin);
                 txtViewCoins.startAnimation(zoomin);
@@ -595,14 +682,14 @@ public class GameActivity extends BaseActivity implements View.OnClickListener {
                         count += 1;
                         if (count > 5) {
                             Session.setSharedData("myCoins", String.valueOf(myCoins));
-//                            Animation zoomout = AnimationUtils.loadAnimation(GameActivity.this, R.anim.zoomout);
-//                            txtViewCoins.startAnimation(zoomout);
+                            Animation zoomout = AnimationUtils.loadAnimation(GameActivity.this, R.anim.zoomout);
+                            txtViewCoins.startAnimation(zoomout);
                             return;
                         }
 
                         myCoins -= 1;
                         txtViewCoins.setText(String.valueOf(myCoins));
-                        handler2.postDelayed(this, 100);
+                        handler2.postDelayed(this, 70);
 
                     }
                 }, 100);
@@ -615,13 +702,34 @@ public class GameActivity extends BaseActivity implements View.OnClickListener {
     public void onBackPressed() {
         handlerTimer.removeCallbacks(runnableTimer);
 
-        Intent intent = new Intent(this, ScoreBoardActivity.class);
-        startActivity(intent);
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
 
-//
-//        mediaCoinDrop.stop();
-//        mediaCountDown.stop();
-//        mediaError.stop();
+        final View view = LayoutInflater.from(this).inflate(R.layout.exit_layout_screen, null);
+
+        builder.setView(view);
+        LinearLayout imgWrong = (LinearLayout) view.findViewById(R.id.imgWrong);
+        LinearLayout imgRight = (LinearLayout) view.findViewById(R.id.imgRight);
+
+        final Dialog dialog = builder.create();
+        dialog.show();
+        dialog.getWindow().setBackgroundDrawableResource(android.R.color.transparent);
+
+        imgRight.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                dialog.dismiss();
+                moveTaskToBack(true);
+                android.os.Process.killProcess(android.os.Process.myPid());
+                System.exit(1);
+            }
+        });
+
+        imgWrong.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                dialog.dismiss();
+            }
+        });
 
     }
 
@@ -657,13 +765,13 @@ public class GameActivity extends BaseActivity implements View.OnClickListener {
 
     private void revealShowHome(final int id) {
 
-        if(dialog != null)
+        if (dialog != null)
             dialog.dismiss();
 
         if (id == 1) {
             dView = LayoutInflater.from(GameActivity.this).inflate(R.layout.game_reveal_anim, null);
         } else {
-            dView = LayoutInflater.from(GameActivity.this).inflate(R.layout.game_options_layout, null);;
+            dView = LayoutInflater.from(GameActivity.this).inflate(R.layout.game_options_layout, null);
         }
         dialog = new Dialog(this, R.style.MyAlertDialogStyle);
         dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
@@ -700,6 +808,11 @@ public class GameActivity extends BaseActivity implements View.OnClickListener {
 
     private void revealShow(final View dialogView, final int id) {
 
+        if(revealEnabled)
+            return;
+
+        revealEnabled = true;
+
         int w, h;
 
         if (id == 1) {
@@ -720,7 +833,7 @@ public class GameActivity extends BaseActivity implements View.OnClickListener {
         }
 
 
-        int endRadius = (int) Math.hypot(w, h);
+        int endRadius = (int) Math.hypot(viewss.getWidth(), h);
 
         Animator revealAnimator = null;
         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.LOLLIPOP) {
@@ -729,7 +842,7 @@ public class GameActivity extends BaseActivity implements View.OnClickListener {
 
         viewss.setVisibility(View.VISIBLE);
         if (id == 1)
-            revealAnimator.setDuration(1000);
+            revealAnimator.setDuration(1200);
         else
             revealAnimator.setDuration(500);
 
@@ -754,13 +867,20 @@ public class GameActivity extends BaseActivity implements View.OnClickListener {
             @Override
             public void onAnimationEnd(Animator animation) {
 
+                revealEnabled = false;
+
                 if (id == 1) {
                     if (dialog != null)
                         dialog.dismiss();
-                    setData();
+
+                    if (questionNumber % 10 == 0)
+                        showProgressCongrats();
+                    else
+                        setData();
                 }
 
             }
+
             @Override
             public void onAnimationCancel(Animator animation) {
 
@@ -776,20 +896,28 @@ public class GameActivity extends BaseActivity implements View.OnClickListener {
 
     public void fiftyOptionClick(View view) {
 
-        int answer = Integer.valueOf(questionData.getAnswer());
+        optionclick.start();
 
-        int first = answer - 1;
-        int second = answer + 1;
+        new Handler().postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                int answer = Integer.valueOf(questionData.getAnswer());
 
-        if (first == 0)
-            hideOption(3);
-        else
-            hideOption(first);
+                int first = answer - 1;
+                int second = answer + 1;
 
-        if (second == 5)
-            hideOption(2);
-        else
-            hideOption(second);
+                if (first == 0)
+                    hideOption(3);
+                else
+                    hideOption(first);
+
+                if (second == 5)
+                    hideOption(2);
+                else
+                    hideOption(second);
+            }
+        }, 1000);
+
 
     }
 
@@ -816,11 +944,18 @@ public class GameActivity extends BaseActivity implements View.OnClickListener {
 
     public void viewOptionClick(View view) {
 
+        optionclick.start();
         diableButtons();
         Session.setSkippedAns(1);
         if (dialog != null)
             dialog.dismiss();
-        checkAnswer(Integer.valueOf(questionData.getAnswer()));
+
+        new Handler().postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                setCorrectAnswer();
+            }
+        }, 1000);
     }
 
 
@@ -836,6 +971,8 @@ public class GameActivity extends BaseActivity implements View.OnClickListener {
             setVolume();
             imgSound.setImageResource(R.drawable.ic_volume_off);
         } else {
+
+            optionclick.start();
             edt.putBoolean("SoundSystem", true);
             edt.commit();
             setVolume();
@@ -845,6 +982,8 @@ public class GameActivity extends BaseActivity implements View.OnClickListener {
     }
 
     public void shareOptionClick(View view) {
+
+        optionclick.start();
         if (dialog != null)
             dialog.dismiss();
 
@@ -860,23 +999,70 @@ public class GameActivity extends BaseActivity implements View.OnClickListener {
 
     }
 
-    public void optionsLayoutClick(View view)
-    {
-        if(dialog != null)
+    public void optionsLayoutClick(View view) {
+
+        menubutton.start();
+        if (dialog != null)
             dialog.dismiss();
     }
 
-    public void reloadOptionClick(View view)
-    {
-        if(dialog != null)
+    public void reloadOptionClick(View view) {
+        if (dialog != null)
             dialog.dismiss();
-        setData();
+
+        optionclick.start();
+        Session.setSkippedAns(1);
+
+        new Handler().postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                setData();
+            }
+        }, 1000);
     }
 
-    public void profileOptionClick(View view)
-    {
+    public void profileOptionClick(View view) {
         handlerTimer.removeCallbacks(runnableTimer);
         startActivity(new Intent(this, ScoreBoardActivity.class));
+    }
+
+    public void showProgressCongrats() {
+
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+
+        final View view = LayoutInflater.from(this).inflate(R.layout.congrates_screen, null);
+        builder.setView(view);
+
+        final Dialog dialog = builder.create();
+        dialog.show();
+        dialog.getWindow().setBackgroundDrawableResource(android.R.color.transparent);
+        dialog.setCancelable(false);
+
+        CardView cardContinue = (CardView) view.findViewById(R.id.cardContinue);
+        TextView txtCorrect = (TextView) view.findViewById(R.id.txtCorrect);
+        TextView txtWrong = (TextView) view.findViewById(R.id.txtWrong);
+        TextView txtSkipped = (TextView) view.findViewById(R.id.txtSkipped);
+        TextView txtHead = (TextView) view.findViewById(R.id.txtHead);
+        TextView txtSubHead = (TextView) view.findViewById(R.id.txtSubHead);
+
+
+        txtCorrect.setText(String.valueOf(Session.getCorrectAns()));
+        txtWrong.setText(String.valueOf(Session.getWrongAns()));
+        txtSkipped.setText(String.valueOf(Session.getSkippedAns()));
+        txtHead.setText("Congrats " + Session.getUserName() + " !!");
+        txtSubHead.setText("You have finished " + questionNumber + " questions");
+
+
+        cardContinue.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+                dialog.dismiss();
+                setInterstitialAd();
+            }
+        });
+
+
     }
 
 

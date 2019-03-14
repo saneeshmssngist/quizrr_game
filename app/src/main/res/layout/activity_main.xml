@@ -1,235 +1,33 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout
+<RelativeLayout
         xmlns:android="http://schemas.android.com/apk/res/android"
         xmlns:app="http://schemas.android.com/apk/res-auto"
-        android:layout_width="match_parent" android:layout_height="match_parent"
-        android:background="@color/black"
-        android:orientation="vertical"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:gravity="center"
+        android:background="@color/white"
 >
 
-    <RelativeLayout
+
+    <android.support.v7.widget.CardView
+            android:id="@+id/cardContinue"
             android:layout_width="match_parent"
-            android:layout_height="0dp"
-            android:layout_weight="2.5"
-            android:background="#90282727"
-            android:gravity="center"
+            android:layout_height="50dp"
+            android:layout_margin="100dp"
+            app:cardCornerRadius="25dp"
+            app:cardBackgroundColor="#2a92d7"
+            android:layout_centerVertical="true"
+            android:layout_centerHorizontal="true"
     >
-        <de.hdodenhof.circleimageview.CircleImageView
-                android:layout_width="100dp"
-                android:layout_height="100dp"
+        <TextView
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:text="Ready to Play "
+                android:gravity="center"
+                android:textStyle="bold"
+                android:textSize="16sp"
         />
 
-    </RelativeLayout>
+    </android.support.v7.widget.CardView>
 
-
-    <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="0dp"
-            android:layout_weight="3"
-            android:orientation="vertical"
-            android:layout_margin="20dp"
-    >
-
-        <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="0dp"
-                android:layout_weight="1.2"
-                android:orientation="horizontal"
-                android:background="@color/black"
-        >
-            <android.support.v7.widget.CardView
-                    android:layout_width="0dp"
-                    android:layout_height="100dp"
-                    android:layout_weight="1"
-                    app:cardBackgroundColor="#90383737"
-                    app:cardCornerRadius="10dp"
-                    app:cardElevation="5dp"
-            >
-                <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="match_parent"
-                        android:orientation="vertical"
-                        android:gravity="center"
-                >
-                    <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="Correct"
-                            android:textColor="@color/white"
-                            android:layout_alignParentLeft="true"
-                    />
-                    <TextView
-                            android:id="@+id/txtCorrect"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_marginTop="5dp"
-                            android:layout_alignParentRight="true"
-                            android:text="20"
-                            android:textColor="@color/white"
-                    />
-
-                </LinearLayout>
-
-            </android.support.v7.widget.CardView>
-
-            <android.support.v7.widget.CardView
-                    android:layout_width="0dp"
-                    android:layout_height="100dp"
-                    android:layout_weight="1"
-                    android:layout_marginLeft="10dp"
-                    app:cardBackgroundColor="#90383737"
-                    app:cardCornerRadius="10dp"
-                    app:cardElevation="5dp"
-            >
-                <LinearLayout
-                        android:layout_width="100dp"
-                        android:layout_height="100dp"
-                        android:orientation="vertical"
-                        android:gravity="center"
-                >
-                    <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="Wrong"
-                            android:textColor="@color/white"
-                            android:layout_alignParentLeft="true"
-                    />
-                    <TextView
-                            android:id="@+id/txtWrong"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_marginTop="5dp"
-                            android:layout_alignParentRight="true"
-                            android:text="20"
-                            android:textColor="@color/white"
-                    />
-
-                </LinearLayout>
-
-            </android.support.v7.widget.CardView>
-
-            <android.support.v7.widget.CardView
-                    android:layout_width="0dp"
-                    android:layout_height="100dp"
-                    android:layout_weight="1"
-                    android:layout_marginLeft="10dp"
-                    app:cardBackgroundColor="#90383737"
-                    app:cardCornerRadius="10dp"
-                    app:cardElevation="5dp"
-            >
-                <LinearLayout
-                        android:layout_width="100dp"
-                        android:layout_height="100dp"
-                        android:orientation="vertical"
-                        android:gravity="center"
-                >
-                    <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="Skipped"
-                            android:textColor="@color/white"
-                            android:layout_alignParentLeft="true"
-                    />
-                    <TextView
-                            android:id="@+id/txtSkipped"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_marginTop="5dp"
-                            android:layout_alignParentRight="true"
-                            android:text="20"
-                            android:textColor="@color/white"
-                    />
-
-                </LinearLayout>
-
-            </android.support.v7.widget.CardView>
-        </LinearLayout>
-
-        <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="0dp"
-                android:layout_weight="1.7"
-                android:layout_marginTop="10dp"
-                android:orientation="vertical"
-        >
-            <android.support.v7.widget.CardView
-                    android:layout_width="match_parent"
-                    android:layout_height="50dp"
-                    app:cardBackgroundColor="#90383737"
-                    app:cardCornerRadius="10dp"
-                    app:cardElevation="5dp"
-            >
-                <RelativeLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="match_parent"
-                        android:orientation="horizontal"
-                        android:gravity="center_vertical"
-                >
-                    <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_marginLeft="20dp"
-                            android:text="Accuracy"
-                            android:textColor="@color/white"
-                            android:layout_alignParentLeft="true"
-                            android:gravity="center_vertical"
-                    />
-                    <TextView
-                            android:id="@+id/txtAccuracy"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_marginRight="20dp"
-                            android:layout_alignParentRight="true"
-                            android:text="20"
-                            android:textColor="@color/white"
-                            android:gravity="center_vertical"
-                    />
-
-                </RelativeLayout>
-
-            </android.support.v7.widget.CardView>
-
-            <android.support.v7.widget.CardView
-                    android:layout_width="match_parent"
-                    android:layout_height="50dp"
-                    app:cardBackgroundColor="#90383737"
-                    app:cardCornerRadius="10dp"
-                    app:cardElevation="5dp"
-                    android:layout_marginTop="10dp"
-            >
-                <RelativeLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="match_parent"
-                        android:orientation="horizontal"
-                        android:gravity="center_vertical"
-                >
-                    <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_marginLeft="20dp"
-                            android:text="Accuracy"
-                            android:textColor="@color/white"
-                            android:layout_alignParentLeft="true"
-                            android:gravity="center_vertical"
-                    />
-                    <TextView
-                            android:id="@+id/txtSpeed"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_marginRight="20dp"
-                            android:layout_alignParentRight="true"
-                            android:text="Speed : 200+ Q/hr"
-                            android:textColor="@color/white"
-                            android:gravity="center_vertical"
-                    />
-
-                </RelativeLayout>
-
-            </android.support.v7.widget.CardView>
-
-        </LinearLayout>
-
-    </LinearLayout>
-
-
-</LinearLayout>
+</RelativeLayout>

@@ -1,23 +1,36 @@
 package com.astalavista.saneesh.quizrrgame.Activities;
 
+import android.animation.Animator;
+import android.animation.AnimatorListenerAdapter;
+import android.animation.ObjectAnimator;
+import android.app.AlertDialog;
+import android.app.Dialog;
 import android.graphics.Typeface;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
+import android.support.v7.view.ContextThemeWrapper;
+import android.view.Gravity;
+import android.view.LayoutInflater;
 import android.view.View;
+import android.view.WindowManager;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import com.astalavista.saneesh.quizrrgame.R;
 import com.astalavista.saneesh.quizrrgame.Session;
+import de.hdodenhof.circleimageview.CircleImageView;
 
 public class ScoreBoardActivity extends BaseActivity {
 
 
     private TextView txtCorrect, txtWrong, txtSkipped, txtAccuracy, txtName;
     private ImageView imgViewProfile, imgViewBack;
+    private TextView txtViewTitle, txtCoins;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        getWindow().addFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
         setContentView(R.layout.activity_score_board);
 
         txtCorrect = (TextView) findViewById(R.id.txtCorrect);
@@ -27,6 +40,8 @@ public class ScoreBoardActivity extends BaseActivity {
         imgViewProfile = (ImageView) findViewById(R.id.imgViewProfile);
         imgViewBack = (ImageView) findViewById(R.id.imgViewBack);
         txtName = (TextView) findViewById(R.id.txtName);
+        txtViewTitle = (TextView) findViewById(R.id.txtViewTitle);
+        txtCoins = (TextView) findViewById(R.id.txtCoins);
 
         txtCorrect.setTypeface(Typeface.createFromAsset(getAssets(), "montserrat-bold.ttf"));
         txtWrong.setTypeface(Typeface.createFromAsset(getAssets(), "montserrat-bold.ttf"));
@@ -36,6 +51,8 @@ public class ScoreBoardActivity extends BaseActivity {
         txtWrong.setText(String.valueOf(Session.getWrongAns()));
         txtSkipped.setText(String.valueOf(Session.getSkippedAns()));
         txtName.setText(Session.getUserName());
+
+        txtCoins.setText(Session.getSharedData("myCoins") + " Coins");
 
         float accuracy = 0;
 
@@ -57,6 +74,41 @@ public class ScoreBoardActivity extends BaseActivity {
             }
         });
 
+
+        txtViewTitle.setTypeface(Typeface.createFromAsset(getAssets(), "raleway-thin.ttf"));
+
+        ObjectAnimator animation = ObjectAnimator.ofFloat(txtViewTitle, "translationY", -100f);
+        animation.setDuration(10000);
+        animation.addListener(new Animator.AnimatorListener() {
+            @Override
+            public void onAnimationStart(Animator animation) {
+
+            }
+
+            @Override
+            public void onAnimationEnd(Animator animation) {
+
+                txtViewTitle.setVisibility(View.VISIBLE);
+            }
+
+            @Override
+            public void onAnimationCancel(Animator animation) {
+
+            }
+
+            @Override
+            public void onAnimationRepeat(Animator animation) {
+
+            }
+        });
+        animation.reverse();
+        animation.start();
+
+    }
+
+    @Override
+    public void onBackPressed() {
+        super.onBackPressed();
     }
 
 }
